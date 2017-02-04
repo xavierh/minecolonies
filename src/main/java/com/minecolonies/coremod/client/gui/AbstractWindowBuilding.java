@@ -22,15 +22,17 @@ public abstract class AbstractWindowBuilding<B extends AbstractBuildingHut.View>
     private static final String BUTTON_REPAIR       = "repair";
     private static final String BUTTON_INVENTORY    = "inventory";
     private static final String LABEL_BUILDING_NAME = "name";
-    private static final String BUTTON_PREVPAGE     = "prevPage";
-    private static final String BUTTON_NEXTPAGE     = "nextPage";
-    private static final String VIEW_PAGES          = "pages";
+    private static final String BUTTON_PREVPAGE             = "prevPage";
+    private static final String BUTTON_NEXTPAGE             = "nextPage";
+    private static final String VIEW_PAGES = "pages";
+
+    private final Button buttonPrevPage;
+    private final Button buttonNextPage;
+
     /**
      * Type B is a class that extends {@link AbstractBuildingWorker.View}.
      */
     protected final B building;
-    private final Button buttonPrevPage;
-    private final Button buttonNextPage;
 
     /**
      * Constructor for the windows that are associated with buildings.
@@ -80,7 +82,7 @@ public abstract class AbstractWindowBuilding<B extends AbstractBuildingHut.View>
     @Override
     public void onOpened()
     {
-        if (buttonPrevPage != null)
+        if(buttonPrevPage != null)
         {
             findPaneOfTypeByID(BUTTON_PREVPAGE, Button.class).setEnabled(false);
         }
@@ -98,13 +100,6 @@ public abstract class AbstractWindowBuilding<B extends AbstractBuildingHut.View>
             button.disable();
         }
     }
-
-    /**
-     * Returns the name of a building.
-     *
-     * @return Name of a building.
-     */
-    public abstract String getBuildingName();
 
     @Override
     public void onButtonClicked(@NotNull final Button button)
@@ -126,4 +121,11 @@ public abstract class AbstractWindowBuilding<B extends AbstractBuildingHut.View>
                 break;
         }
     }
+
+    /**
+     * Returns the name of a building.
+     *
+     * @return Name of a building.
+     */
+    public abstract String getBuildingName();
 }

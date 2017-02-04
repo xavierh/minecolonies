@@ -56,13 +56,15 @@ public class RenderBipedCitizen extends RenderBiped<EntityCitizen>
     {
 
         mainModel = citizen.isFemale()
-                      ? idToFemaleModelMap.get(citizen.getModelID())
-                      : idToMaleModelMap.get(citizen.getModelID());
+                           ? idToFemaleModelMap.get(citizen.getModelID())
+                           : idToMaleModelMap.get(citizen.getModelID());
 
         if (mainModel == null)
         {
             mainModel = citizen.isFemale() ? defaultModelFemale : defaultModelMale;
         }
+
+        mainModel = mainModel;
 
         super.doRender(citizen, d, d1, d2, f, f1);
     }

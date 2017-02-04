@@ -43,63 +43,59 @@ public abstract class AbstractEntityAIGuard extends AbstractEntityAISkill<JobGua
     /**
      * Worker gets this distance times building level away from his building to patrol.
      */
-    public static final    int    PATROL_DISTANCE         = 40;
+    public static final int PATROL_DISTANCE = 40;
     /**
      * Follow the player if farther than this.
      */
-    public static final    int    FOLLOW_RANGE            = 10;
+    public static final int FOLLOW_RANGE = 10;
     /**
      * Distance the guard starts searching.
      */
-    protected static final int  START_SEARCH_DISTANCE   = 5;
+    protected static final int START_SEARCH_DISTANCE = 5;
     /**
      * The start search distance of the guard to track/attack entities may get more depending on the level.
      */
-    private static final double MAX_ATTACK_DISTANCE     = 20.0D;
+    private static final double MAX_ATTACK_DISTANCE = 20.0D;
     /**
      * Basic delay after operations.
      */
-    private static final int    BASE_DELAY              = 1;
+    private static final int BASE_DELAY = 1;
     /**
      * Max amount the guard can shoot arrows before restocking.
      */
-    private static final int    BASE_MAX_ATTACKS        = 25;
+    private static final int MAX_ATTACKS = 50;
     /**
      * Y range in which the guard detects other entities.
      */
-    private static final double HEIGHT_DETECTION_RANGE  = 10D;
+    private static final double HEIGHT_DETECTION_RANGE = 10D;
     /**
      * Path that close to the patrol target.
      */
-    private static final int    PATH_CLOSE              = 2;
+    private static final int PATH_CLOSE = 2;
     /**
      * Horizontal range in which the guard picks up items.
      */
-    private static final   double RANGE_HORIZONTAL_PICKUP = 20.0D;
+    private static final double RANGE_HORIZONTAL_PICKUP = 20.0D;
     /**
      * Vertical range in which the guard picks up items.
      */
-    private static final   double RANGE_VERTICAL_PICKUP   = 2.0D;
+    private static final double RANGE_VERTICAL_PICKUP   = 2.0D;
     /**
      * Amount of ticks after which the guard stops trying to gather and tries to get onto another task.
      */
-    private static final int STUCK_WAIT_TICKS                 = 20;
+    private static final int STUCK_WAIT_TICKS = 20;
     /**
      * The amount of time to wait while walking to items.
      */
-    private static final int WAIT_WHILE_WALKING               = 5;
+    private static final int WAIT_WHILE_WALKING = 5;
     /**
      * The range in which the guard picks up items.
      */
-    private static final int ITEM_PICKUP_RANGE                = 3;
+    private static final int ITEM_PICKUP_RANGE = 3;
     /**
      * The dump base of actions, will increase depending on level.
      */
-    private static final int DUMP_BASE                        = 20;
-    /**
-     * Increases the max attacks by this amount per level.
-     */
-    private static final int ADDITIONAL_MAX_ATTACKS_PER_LEVEL = 5;
+    private static final int DUMP_BASE = 20;
     /**
      * The current target.
      */
@@ -115,7 +111,7 @@ public abstract class AbstractEntityAIGuard extends AbstractEntityAISkill<JobGua
     /**
      * Checks if the guard should dump its inventory.
      */
-    private   int dumpAfterActions      = DUMP_BASE;
+    private int dumpAfterActions = DUMP_BASE;
     /**
      * Current goTo task.
      */
@@ -384,7 +380,7 @@ public abstract class AbstractEntityAIGuard extends AbstractEntityAISkill<JobGua
     protected int getMaxAttacksUntilRestock()
     {
         final BuildingGuardTower guardTower = (BuildingGuardTower) worker.getWorkBuilding();
-        return (guardTower == null) ? 0 : (BASE_MAX_ATTACKS + guardTower.getBuildingLevel() * ADDITIONAL_MAX_ATTACKS_PER_LEVEL);
+        return (guardTower == null) ? 0 : (MAX_ATTACKS + guardTower.getBuildingLevel());
     }
 
     /**
@@ -454,7 +450,7 @@ public abstract class AbstractEntityAIGuard extends AbstractEntityAISkill<JobGua
                 final EntityPlayer player = building.getPlayer();
                 if (player != null)
                 {
-                    LanguageHandler.sendPlayerMessage(building.getPlayer(), "com.minecolonies.coremod.job.guard.switch");
+                    LanguageHandler.sendPlayerMessage(building.getPlayer(), LanguageHandler.format("com.minecolonies.coremod.job.guard.switch"));
                 }
                 pos = building.getLocation();
                 building.setTask(BuildingGuardTower.Task.GUARD);

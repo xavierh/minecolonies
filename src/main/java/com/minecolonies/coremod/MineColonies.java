@@ -27,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
   /*dependencies = Constants.FORGE_VERSION,*/ acceptedMinecraftVersions = Constants.MC_VERSION)
 public class MineColonies
 {
-    private static final Logger logger = LogManager.getLogger(Constants.MOD_ID);
     /**
      * Forge created instance of the Mod.
      */
@@ -38,6 +37,7 @@ public class MineColonies
      */
     @SidedProxy(clientSide = Constants.CLIENT_PROXY_LOCATION, serverSide = Constants.SERVER_PROXY_LOCATION)
     public static IProxy       proxy;
+    private static final Logger logger = LogManager.getLogger(Constants.MOD_ID);
     private static SimpleNetworkWrapper network;
 
     /**

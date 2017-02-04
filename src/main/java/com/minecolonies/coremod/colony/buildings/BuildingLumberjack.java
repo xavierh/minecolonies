@@ -40,7 +40,7 @@ public class BuildingLumberjack extends AbstractBuildingWorker
     /**
      * Sets the amount of saplings the lumberjack should keep.
      */
-    private static final int SAPLINGS_TO_KEEP = 32;
+    private static final int SAPLINGS_TO_KEEP = 10;
 
     private final Map<ItemStorage, Integer> keepX = new HashMap<>();
 
@@ -100,6 +100,20 @@ public class BuildingLumberjack extends AbstractBuildingWorker
     }
 
     /**
+     * Override this method if you want to keep some items in inventory.
+     * When the inventory is full, everything get's dumped into the building chest.
+     * But you can use this method to hold some stacks back.
+     *
+     * @param stack the stack to decide on
+     * @return true if the stack should remain in inventory
+     */
+    @Override
+    public boolean neededForWorker(@Nullable final ItemStack stack)
+    {
+        return Utils.isStackAxe(stack);
+    }
+
+    /**
      * Override this method if you want to keep an amount of items in inventory.
      * When the inventory is full, everything get's dumped into the building chest.
      * But you can use this method to hold some stacks back.
@@ -135,20 +149,6 @@ public class BuildingLumberjack extends AbstractBuildingWorker
     public AbstractJob createJob(final CitizenData citizen)
     {
         return new JobLumberjack(citizen);
-    }
-
-    /**
-     * Override this method if you want to keep some items in inventory.
-     * When the inventory is full, everything get's dumped into the building chest.
-     * But you can use this method to hold some stacks back.
-     *
-     * @param stack the stack to decide on
-     * @return true if the stack should remain in inventory
-     */
-    @Override
-    public boolean neededForWorker(@Nullable final ItemStack stack)
-    {
-        return Utils.isStackAxe(stack);
     }
 
     /**

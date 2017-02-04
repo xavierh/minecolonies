@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Helper class for localization and sending player messages.
@@ -20,25 +21,104 @@ public final class LanguageHandler
      */
     private LanguageHandler()
     {
-        // Intentionally left empty.
+        /*
+         * Intentionally left empty.
+         */
+    }
+
+    /**
+     * Send a localized and formatted message to a player.
+     *
+     * @param player player to send the message to.
+     * @param key    unlocalized key.
+     * @param args   Objects for String.format().
+     */
+    public static void sendPlayerLocalizedMessage(@NotNull final EntityPlayer player, final String key, final Object... args)
+    {
+        sendPlayerMessage(player, key, args);
     }
 
     /**
      * Send a message to the player.
-     *
      * @param player the player to send to.
      * @param key the key of the message.
      * @param message the message to send.
      */
     public static void sendPlayerMessage(@NotNull final EntityPlayer player, final String key, final Object... message)
     {
-        player.sendMessage(buildChatComponent(key, message));
+        TextComponentTranslation translation = null;
+
+        int onlyArgsUntil = 0;
+        for (final Object object : message)
+        {
+            if (object instanceof ITextComponent || object instanceof TextComponentTranslation)
+            {
+                if(onlyArgsUntil == 0)
+                {
+                    onlyArgsUntil = -1;
+                }
+                break;
+            }
+            onlyArgsUntil++;
+        }
+
+        if (onlyArgsUntil >= 0)
+        {
+            final Object[] args = new Object[onlyArgsUntil];
+            for(int i = 0; i < onlyArgsUntil; i++)
+            {
+                args[i] = message[i];
+            }
+            translation = new TextComponentTranslation(key, args);
+        }
+
+        for (final Object object : message)
+        {
+            if (translation == null)
+            {
+                if (object instanceof ITextComponent)
+                {
+                    translation = new TextComponentTranslation(key);
+                }
+                else
+                {
+                    translation = new TextComponentTranslation(key, object);
+                    continue;
+                }
+            }
+            if (object instanceof ITextComponent)
+            {
+                translation.appendSibling((ITextComponent) object);
+            }
+            else if (object instanceof String)
+            {
+                boolean isInArgs = false;
+                for(Object obj: translation.getFormatArgs())
+                {
+                    if(obj.equals(object))
+                    {
+                        isInArgs = true;
+                    }
+                }
+                if(!isInArgs)
+                {
+                    translation.appendText((String) object);
+                }
+            }
+        }
+
+        if (translation == null)
+        {
+            translation = new TextComponentTranslation(key);
+        }
+
+        player.sendMessage(translation);
     }
 
     /**
      * Localize a string and use String.format().
      *
-     * @param key  translation key.
+     * @param key  unlocalized key.
      * @param args Objects for String.format().
      * @return Localized string.
      */
@@ -57,6 +137,18 @@ public final class LanguageHandler
     }
 
     /**
+     * Send a localized and formatted message to multiple players.
+     *
+     * @param players EntityPlayers to send the message to.
+     * @param key     unlocalized key.
+     * @param args    Objects for String.format().
+     */
+    public static void sendPlayersLocalizedMessage(final List<EntityPlayer> players, final String key, final Object... args)
+    {
+        sendPlayersMessage(players, key, args);
+    }
+
+    /**
      * Send message to a list of players.
      *
      * @param players the list of players.
@@ -69,84 +161,9 @@ public final class LanguageHandler
         {
             return;
         }
-
-        ITextComponent textComponent = buildChatComponent(key, message);
-
         for (@NotNull final EntityPlayer player : players)
         {
-            player.sendMessage(textComponent);
+            sendPlayerMessage(player, key, message);
         }
-    }
-
-    private static ITextComponent buildChatComponent(final String key, final Object... message)
-    {
-        TextComponentTranslation translation = null;
-
-        int onlyArgsUntil = 0;
-        for (final Object object : message)
-        {
-            if (object instanceof ITextComponent)
-            {
-                if (onlyArgsUntil == 0)
-                {
-                    onlyArgsUntil = -1;
-                }
-                break;
-            }
-            onlyArgsUntil++;
-        }
-
-        if (onlyArgsUntil >= 0)
-        {
-            final Object[] args = new Object[onlyArgsUntil];
-            System.arraycopy(message, 0, args, 0, onlyArgsUntil);
-
-            translation = new TextComponentTranslation(key, args);
-        }
-
-        for (final Object object : message)
-        {
-            if (translation == null)
-            {
-                if (object instanceof ITextComponent)
-                {
-                    translation = new TextComponentTranslation(key);
-                }
-                else
-                {
-                    translation = new TextComponentTranslation(key, object);
-                    continue;
-                }
-            }
-
-            if (object instanceof ITextComponent)
-            {
-                translation.appendSibling((ITextComponent) object);
-            }
-            else if (object instanceof String)
-            {
-                boolean isInArgs = false;
-                for (final Object obj : translation.getFormatArgs())
-                {
-                    if (obj.equals(object))
-                    {
-                        isInArgs = true;
-                        break;
-                    }
-                }
-
-                if(!isInArgs)
-                {
-                    translation.appendText((String) object);
-                }
-            }
-        }
-
-        if (translation == null)
-        {
-            translation = new TextComponentTranslation(key);
-        }
-
-        return translation;
     }
 }

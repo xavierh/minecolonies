@@ -109,7 +109,6 @@ public class Label extends AbstractTextElement
 
     /**
      * Getter of the width of the string.
-     *
      * @return the width.
      */
     public int getStringWidth()
@@ -119,7 +118,6 @@ public class Label extends AbstractTextElement
 
     /**
      * Getter of the text height.
-     *
      * @return the text height.
      */
     public int getTextHeight()

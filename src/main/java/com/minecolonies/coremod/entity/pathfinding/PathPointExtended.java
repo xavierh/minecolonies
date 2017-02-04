@@ -13,7 +13,7 @@ public class PathPointExtended extends PathPoint
     /**
      * Is the point on a ladder.
      */
-    private boolean    onLadder     = false;
+    private boolean    onLadder   = false;
     /**
      * What direction does the ladder face.
      * Should be instantiated to something he doesn't recognize as climbable.
@@ -22,7 +22,6 @@ public class PathPointExtended extends PathPoint
 
     /**
      * Instantiates the pathPoint with a position.
-     *
      * @param pos the position.
      */
     public PathPointExtended(@NotNull final BlockPos pos)
@@ -32,7 +31,6 @@ public class PathPointExtended extends PathPoint
 
     /**
      * Checks if the point is on a ladder.
-     *
      * @return true if so.
      */
     public boolean isOnLadder()
@@ -42,7 +40,6 @@ public class PathPointExtended extends PathPoint
 
     /**
      * Sets if the point is on a ladder.
-     *
      * @param onLadder value to set.
      */
     public void setOnLadder(final boolean onLadder)
@@ -52,7 +49,6 @@ public class PathPointExtended extends PathPoint
 
     /**
      * Get the facing of the ladder.
-     *
      * @return enumFacing.
      */
     public EnumFacing getLadderFacing()
@@ -62,7 +58,6 @@ public class PathPointExtended extends PathPoint
 
     /**
      * Sets the facing of the ladder.
-     *
      * @param ladderFacing facing to set.
      */
     public void setLadderFacing(final EnumFacing ladderFacing)

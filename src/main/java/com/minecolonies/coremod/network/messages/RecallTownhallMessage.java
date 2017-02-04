@@ -74,7 +74,7 @@ public class RecallTownhallMessage extends AbstractMessage<RecallTownhallMessage
                 {
                     if (!TeleportHelper.teleportCitizen(citizenData.getCitizenEntity(), world, location))
                     {
-                        LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.workerHuts.recallFail");
+                        LanguageHandler.sendPlayerLocalizedMessage(player, "com.minecolonies.coremod.workerHuts.recallFail");
                     }
                 }
             }

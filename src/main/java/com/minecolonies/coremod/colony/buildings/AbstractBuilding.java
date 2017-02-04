@@ -6,6 +6,8 @@ import com.minecolonies.coremod.colony.CitizenData;
 import com.minecolonies.coremod.colony.Colony;
 import com.minecolonies.coremod.colony.ColonyManager;
 import com.minecolonies.coremod.colony.ColonyView;
+import com.minecolonies.coremod.colony.materials.MaterialStore;
+import com.minecolonies.coremod.colony.materials.MaterialSystem;
 import com.minecolonies.coremod.colony.workorders.WorkOrderBuild;
 import com.minecolonies.coremod.entity.ai.item.handling.ItemStorage;
 import com.minecolonies.coremod.tileentities.TileEntityColonyBuilding;
@@ -66,6 +68,7 @@ public abstract class AbstractBuilding
      * The tag to store the style of the building.
      */
     private static final String TAG_STYLE = "style";
+
     /**
      * A list of ItemStacks with needed items and their quantity.
      * This list is a diff between itemsNeeded in AbstractEntityAiBasic and
@@ -77,49 +80,65 @@ public abstract class AbstractBuilding
      */
     @NotNull
     private List<ItemStack> itemsCurrentlyNeeded = new ArrayList<>();
+
+    /**
+     * A list which contains the position of all containers which belong to the worker building.
+     */
+    private final List<BlockPos> containerList = new ArrayList<>();
+
     /**
      * This flag tells if we need a shovel, will be set on tool needs.
      */
     private boolean needsShovel = false;
+
     /**
      * This flag tells if we need an axe, will be set on tool needs.
      */
     private boolean needsAxe = false;
+
     /**
      * This flag tells if we need a hoe, will be set on tool needs.
      */
     private boolean needsHoe = false;
+
     /**
      * This flag tells if we need a pickaxe, will be set on tool needs.
      */
     private boolean needsPickaxe = false;
+
     /**
      * This flag tells if we need a weapon, will be set on tool needs.
      */
     private boolean needsWeapon = false;
+
     /**
      * The minimum pickaxe level we need to fulfill the tool request.
      */
     private int needsPickaxeLevel = -1;
+
     /**
      * Checks if there is a ongoing delivery for the currentItem.
      */
     private boolean onGoingDelivery = false;
+
     /**
      * Map to resolve names to class.
      */
     @NotNull
     private static final Map<String, Class<?>> nameToClassMap = new HashMap<>();
+
     /**
      * Map to resolve classes to name.
      */
     @NotNull
     private static final Map<Class<?>, String> classToNameMap = new HashMap<>();
+
     /**
      * Map to resolve block to building class.
      */
     @NotNull
     private static final Map<Class<?>, Class<?>> blockClassToBuildingClassMap = new HashMap<>();
+
     /**
      * Map to resolve classNameHash to class.
      */
@@ -143,20 +162,25 @@ public abstract class AbstractBuilding
         addMapping("Fisherman", BuildingFisherman.class, BlockHutFisherman.class);
         addMapping("GuardTower", BuildingGuardTower.class, BlockHutGuardTower.class);
         addMapping("WareHouse", BuildingWareHouse.class, BlockHutWareHouse.class);
+
     }
-    /**
-     * A list which contains the position of all containers which belong to the worker building.
-     */
-    private final List<BlockPos> containerList = new ArrayList<>();
+
     /**
      * The location of the building.
      */
     private final BlockPos location;
+
     /**
      * The colony the building belongs to.
      */
     @NotNull
     private final Colony colony;
+
+    /**
+     * The material store of the colony (WIP).
+     */
+    private final MaterialStore materialStore;
+
     /**
      * The tileEntity of the building.
      */
@@ -192,6 +216,7 @@ public abstract class AbstractBuilding
     {
         location = pos;
         this.colony = colony;
+        materialStore = new MaterialStore(MaterialStore.Type.CHEST, colony.getMaterialSystem());
     }
 
     /**
@@ -305,6 +330,11 @@ public abstract class AbstractBuilding
         {
             Log.getLogger().warn("Loaded empty style, setting to wooden");
             style = "wooden";
+        }
+
+        if (MaterialSystem.isEnabled)
+        {
+            materialStore.readFromNBT(compound);
         }
 
         final NBTTagList containerTagList = compound.getTagList(TAG_CONTAINERS, Constants.NBT.TAG_COMPOUND);
@@ -455,9 +485,14 @@ public abstract class AbstractBuilding
         compound.setInteger(TAG_ROTATION, rotation);
         compound.setString(TAG_STYLE, style);
 
+        if (MaterialSystem.isEnabled)
+        {
+            materialStore.writeToNBT(compound);
+        }
+
 
         @NotNull final NBTTagList containerTagList = new NBTTagList();
-        for (@NotNull final BlockPos pos : containerList)
+        for (@NotNull final BlockPos pos: containerList)
         {
             containerTagList.appendTag(NBTUtil.createPosTag(pos));
         }
@@ -511,10 +546,15 @@ public abstract class AbstractBuilding
         final World world = colony.getWorld();
         final Block block = world.getBlockState(this.location).getBlock();
 
-        if (tileEntityNew != null)
+        if(tileEntityNew != null)
         {
             InventoryHelper.dropInventoryItems(world, this.location, (IInventory) tileEntityNew);
             world.updateComparatorOutputLevel(this.location, block);
+        }
+
+        if (MaterialSystem.isEnabled)
+        {
+            materialStore.destroy();
         }
     }
 
@@ -627,7 +667,7 @@ public abstract class AbstractBuilding
         }
 
         colony.getWorkManager().addWorkOrder(new WorkOrderBuild(this, level));
-        LanguageHandler.sendPlayersMessage(colony.getMessageEntityPlayers(), "com.minecolonies.coremod.workOrderAdded");
+        LanguageHandler.sendPlayersLocalizedMessage(colony.getMessageEntityPlayers(), "com.minecolonies.coremod.workOrderAdded");
     }
 
     /**
@@ -690,6 +730,16 @@ public abstract class AbstractBuilding
     public void setStyle(final String style)
     {
         this.style = style;
+    }
+
+    /**
+     * Gets the MaterialStore for this building.
+     *
+     * @return The MaterialStore that tracks this building's inventory.
+     */
+    public MaterialStore getMaterialStore()
+    {
+        return materialStore;
     }
 
     /**
@@ -756,7 +806,6 @@ public abstract class AbstractBuilding
 
     /**
      * Add a new container to the building.
-     *
      * @param pos position to add.
      */
     public void addContainerPosition(BlockPos pos)
@@ -766,7 +815,6 @@ public abstract class AbstractBuilding
 
     /**
      * Remove a container from the building.
-     *
      * @param pos position to remove.
      */
     public void removeContainerPosition(BlockPos pos)
@@ -776,7 +824,6 @@ public abstract class AbstractBuilding
 
     /**
      * Get all additional containers which belong to the building.
-     *
      * @return a copy of the list to avoid currentModification exception.
      */
     public List<BlockPos> getAdditionalCountainers()
@@ -800,7 +847,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the building is receiving the required items.
-     *
      * @return true if so.
      */
     public boolean hasOnGoingDelivery()
@@ -810,7 +856,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the building is receiving the required items.
-     *
      * @param valueToSet true or false
      */
     public void setOnGoingDelivery(boolean valueToSet)
@@ -820,7 +865,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker needs anything. Tool or item.
-     *
      * @return true if so.
      */
     public boolean needsAnything()
@@ -830,7 +874,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if any items are needed at the moment.
-     *
      * @return true if so.
      */
     public boolean areItemsNeeded()
@@ -840,7 +883,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker requires a shovel.
-     *
      * @return true if so.
      */
     public boolean needsShovel()
@@ -850,7 +892,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker requires a axe.
-     *
      * @return true if so.
      */
     public boolean needsAxe()
@@ -860,7 +901,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker requires a hoe.
-     *
      * @return true if so.
      */
     public boolean needsHoe()
@@ -870,7 +910,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker requires a pickaxe.
-     *
      * @return true if so.
      */
     public boolean needsPickaxe()
@@ -880,7 +919,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check if the worker requires a weapon.
-     *
      * @return true if so.
      */
     public boolean needsWeapon()
@@ -890,7 +928,6 @@ public abstract class AbstractBuilding
 
     /**
      * Check the required pickaxe level..
-     *
      * @return the mining level of the pickaxe.
      */
     public int getNeededPickaxeLevel()
@@ -900,7 +937,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set if the worker needs a shovel.
-     *
      * @param needsShovel true or false.
      */
     public void setNeedsShovel(final boolean needsShovel)
@@ -910,7 +946,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set if the worker needs a axe.
-     *
      * @param needsAxe true or false.
      */
     public void setNeedsAxe(final boolean needsAxe)
@@ -920,7 +955,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set if the worker needs a hoe.
-     *
      * @param needsHoe true or false.
      */
     public void setNeedsHoe(final boolean needsHoe)
@@ -930,7 +964,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set if the worker needs a pickaxe.
-     *
      * @param needsPickaxe true or false.
      */
     public void setNeedsPickaxe(final boolean needsPickaxe)
@@ -940,7 +973,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set if the worker needs a weapon.
-     *
      * @param needsWeapon true or false.
      */
     public void setNeedsWeapon(final boolean needsWeapon)
@@ -950,12 +982,11 @@ public abstract class AbstractBuilding
 
     /**
      * Add a neededItem to the currentlyNeededItem list.
-     *
      * @param stack the stack to add.
      */
     public void addNeededItems(@Nullable ItemStack stack)
     {
-        if (stack != null)
+        if(stack != null)
         {
             itemsCurrentlyNeeded.add(stack);
         }
@@ -963,7 +994,6 @@ public abstract class AbstractBuilding
 
     /**
      * Getter for the neededItems.
-     *
      * @return an unmodifiable list.
      */
     public List<ItemStack> getNeededItems()
@@ -973,13 +1003,12 @@ public abstract class AbstractBuilding
 
     /**
      * Getter for the first of the currentlyNeededItems.
-     *
      * @return copy of the itemStack.
      */
     @Nullable
     public ItemStack getFirstNeededItem()
     {
-        if (itemsCurrentlyNeeded.isEmpty())
+        if(itemsCurrentlyNeeded.isEmpty())
         {
             return null;
         }
@@ -996,7 +1025,6 @@ public abstract class AbstractBuilding
 
     /**
      * Overwrite the itemsCurrentlyNeededList with a new one.
-     *
      * @param newList the new list to set.
      */
     public void setItemsCurrentlyNeeded(@NotNull List<ItemStack> newList)
@@ -1006,7 +1034,6 @@ public abstract class AbstractBuilding
 
     /**
      * Set the needed pickaxe level of the worker.
-     *
      * @param needsPickaxeLevel the mining level.
      */
     public void setNeedsPickaxeLevel(final int needsPickaxeLevel)
@@ -1016,32 +1043,31 @@ public abstract class AbstractBuilding
 
     /**
      * Check for the required tool and return the describing string.
-     *
      * @return the string of the required tool.
      */
     public String getRequiredTool()
     {
-        if (needsHoe)
+        if(needsHoe)
         {
             return Utils.HOE;
         }
 
-        if (needsAxe)
+        if(needsAxe)
         {
             return Utils.AXE;
         }
 
-        if (needsPickaxe)
+        if(needsPickaxe)
         {
             return Utils.PICKAXE;
         }
 
-        if (needsShovel)
+        if(needsShovel)
         {
             return Utils.SHOVEL;
         }
 
-        if (needsWeapon)
+        if(needsWeapon)
         {
             return Utils.WEAPON;
         }
@@ -1051,19 +1077,18 @@ public abstract class AbstractBuilding
 
     /**
      * Try to transfer a stack to one of the inventories of the building.
-     *
      * @param stack the stack to transfer.
      * @param world the world to do it in.
      * @return true if was able to.
      */
     public boolean transferStack(@NotNull final ItemStack stack, @NotNull final World world)
     {
-        if (tileEntity == null || InventoryUtils.isInventoryFull(tileEntity))
+        if(tileEntity == null || InventoryUtils.isInventoryFull(tileEntity))
         {
-            for (final BlockPos pos : containerList)
+            for(final BlockPos pos: containerList)
             {
                 final TileEntity tempTileEntity = world.getTileEntity(pos);
-                if (tempTileEntity instanceof TileEntityChest && !InventoryUtils.isInventoryFull((IInventory) tempTileEntity))
+                if(tempTileEntity instanceof TileEntityChest && !InventoryUtils.isInventoryFull((IInventory) tempTileEntity))
                 {
                     return InventoryUtils.addItemStackToInventory((IInventory) tempTileEntity, stack);
                 }
@@ -1078,7 +1103,6 @@ public abstract class AbstractBuilding
 
     /**
      * Try to transfer a stack to one of the inventories of the building and force the transfer.
-     *
      * @param stack the stack to transfer.
      * @param world the world to do it in.
      * @return the itemStack which has been replaced
@@ -1086,12 +1110,12 @@ public abstract class AbstractBuilding
     @Nullable
     public ItemStack forceTransferStack(final ItemStack stack, final World world)
     {
-        if (tileEntity == null)
+        if(tileEntity == null)
         {
-            for (final BlockPos pos : containerList)
+            for(final BlockPos pos: containerList)
             {
                 final TileEntity tempTileEntity = world.getTileEntity(pos);
-                if (tempTileEntity instanceof TileEntityChest && !InventoryUtils.isInventoryFull((IInventory) tempTileEntity))
+                if(tempTileEntity instanceof TileEntityChest && !InventoryUtils.isInventoryFull((IInventory) tempTileEntity))
                 {
                     return InventoryUtils.forceItemStackToInventory((IInventory) tempTileEntity, stack, this);
                 }

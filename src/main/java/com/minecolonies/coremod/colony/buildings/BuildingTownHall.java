@@ -25,7 +25,6 @@ public class BuildingTownHall extends AbstractBuildingHut
 
     /**
      * Instantiates the building.
-     *
      * @param c the colony.
      * @param l the location.
      */
@@ -69,7 +68,6 @@ public class BuildingTownHall extends AbstractBuildingHut
     {
         /**
          * Instantiates the view of the building.
-         *
          * @param c the colonyView.
          * @param l the location of the block.
          */

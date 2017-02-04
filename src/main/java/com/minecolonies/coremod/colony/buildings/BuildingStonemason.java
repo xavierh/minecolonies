@@ -18,7 +18,7 @@ public class BuildingStonemason extends AbstractBuildingWorker
     /**
      * Description of the job executed in the hut.
      */
-    private static final String STONEMASON = "Stonemason";
+    private static final String STONEMASON          = "Stonemason";
 
     /**
      * Description of the block used to set this block.
@@ -32,7 +32,6 @@ public class BuildingStonemason extends AbstractBuildingWorker
 
     /**
      * Instantiates the building.
-     *
      * @param c the colony.
      * @param l the location.
      */
@@ -76,7 +75,6 @@ public class BuildingStonemason extends AbstractBuildingWorker
     {
         /**
          * Instantiates the view of the building.
-         *
          * @param c the colonyView.
          * @param l the location of the block.
          */

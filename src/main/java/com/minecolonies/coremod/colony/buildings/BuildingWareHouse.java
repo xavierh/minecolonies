@@ -61,20 +61,19 @@ public class BuildingWareHouse extends AbstractBuilding
 
     /**
      * Register deliveryman with the warehouse.
-     *
      * @param buildingWorker the building of the worker.
      * @return true if able to register or already registered
      */
     public boolean registerWithWareHouse(BuildingDeliveryman buildingWorker)
     {
-        if (registeredDeliverymen.contains(new Vec3d(buildingWorker.getID())))
+        if(registeredDeliverymen.contains(new Vec3d(buildingWorker.getID())))
         {
             return true;
         }
 
-        if (registeredDeliverymen.size() >= getBuildingLevel())
+        if(registeredDeliverymen.size() >= getBuildingLevel())
         {
-            if (!registeredDeliverymen.isEmpty())
+            if(!registeredDeliverymen.isEmpty())
             {
                 Log.getLogger().info(getColony().getName() + " " + Arrays.toString(registeredDeliverymen.toArray()));
                 checkForRegisteredDeliverymen();
@@ -92,11 +91,11 @@ public class BuildingWareHouse extends AbstractBuilding
     private void checkForRegisteredDeliverymen()
     {
         final List<Vec3d> registeredDeliverymenCopy = new ArrayList<>(registeredDeliverymen);
-        for (final Vec3d pos : registeredDeliverymenCopy)
+        for(final Vec3d pos: registeredDeliverymenCopy)
         {
             final Colony colony = getColony();
-            if (colony != null && colony.getWorld() != null
-                  && (!(colony.getWorld().getBlockState(new BlockPos(pos)) instanceof BlockHutDeliveryman) || colony.isCoordInColony(colony.getWorld(), new BlockPos(pos))))
+            if(colony != null && colony.getWorld() != null
+                    && (!(colony.getWorld().getBlockState(new BlockPos(pos)) instanceof BlockHutDeliveryman) || colony.isCoordInColony(colony.getWorld(), new BlockPos(pos))))
             {
                 registeredDeliverymen.remove(pos);
             }
@@ -105,13 +104,12 @@ public class BuildingWareHouse extends AbstractBuilding
 
     /**
      * Check if deliveryman is allowed to access warehouse.
-     *
      * @param buildingWorker the building of the deliveryman.
      * @return true if able to.
      */
     public boolean canAccessWareHouse(BuildingDeliveryman buildingWorker)
     {
-        if (registeredDeliverymen.contains(new Vec3d(buildingWorker.getID())))
+        if(registeredDeliverymen.contains(new Vec3d(buildingWorker.getID())))
         {
             return true;
         }
@@ -120,12 +118,24 @@ public class BuildingWareHouse extends AbstractBuilding
 
     /**
      * Get the deliverymen connected with this building.
-     *
      * @return the unmodifiable List of positions of them.
      */
     public List<Vec3d> getRegisteredDeliverymen()
     {
         return Collections.unmodifiableList(registeredDeliverymen);
+    }
+
+    @NotNull
+    @Override
+    public String getSchematicName()
+    {
+        return WAREHOUSE;
+    }
+
+    @Override
+    public int getMaxBuildingLevel()
+    {
+        return 5;
     }
 
     @Override
@@ -138,18 +148,11 @@ public class BuildingWareHouse extends AbstractBuilding
         for (int i = 0; i < deliverymanTagList.tagCount(); i++)
         {
             final BlockPos pos = NBTUtil.getPosFromTag(deliverymanTagList.getCompoundTagAt(i));
-            if (getColony() != null && getColony().getBuilding(pos) instanceof AbstractBuildingWorker && !registeredDeliverymen.contains(new Vec3d(pos)))
+            if(getColony() != null && getColony().getBuilding(pos) instanceof AbstractBuildingWorker && !registeredDeliverymen.contains(new Vec3d(pos)))
             {
                 registeredDeliverymen.add(new Vec3d(pos));
             }
         }
-    }
-
-    @NotNull
-    @Override
-    public String getSchematicName()
-    {
-        return WAREHOUSE;
     }
 
     @Override
@@ -191,12 +194,6 @@ public class BuildingWareHouse extends AbstractBuilding
     }
 
     @Override
-    public int getMaxBuildingLevel()
-    {
-        return 5;
-    }
-
-    @Override
     public void serializeToView(@NotNull final ByteBuf buf)
     {
         super.serializeToView(buf);
@@ -232,5 +229,6 @@ public class BuildingWareHouse extends AbstractBuilding
         {
             super.deserialize(buf);
         }
+
     }
 }

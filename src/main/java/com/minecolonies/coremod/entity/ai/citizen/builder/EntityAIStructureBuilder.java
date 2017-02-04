@@ -55,12 +55,12 @@ public class EntityAIStructureBuilder extends AbstractEntityAIStructure<JobBuild
     {
         super(job);
         super.registerTargets(
-          new AITarget(IDLE, START_WORKING),
-          new AITarget(this::checkIfExecute, this::getState),
-          new AITarget(START_WORKING, this::startWorkingAtOwnBuilding)
+                new AITarget(IDLE, START_WORKING),
+                new AITarget(this::checkIfExecute, this::getState),
+                new AITarget(START_WORKING, this::startWorkingAtOwnBuilding)
         );
         worker.setSkillModifier(INTELLIGENCE_MULTIPLIER * worker.getCitizenData().getIntelligence()
-                                  + STRENGTH_MULTIPLIER * worker.getCitizenData().getStrength());
+                + STRENGTH_MULTIPLIER * worker.getCitizenData().getStrength());
         worker.setCanPickUpLoot(true);
     }
 
@@ -111,15 +111,15 @@ public class EntityAIStructureBuilder extends AbstractEntityAIStructure<JobBuild
             if (wo == null)
             {
                 Log.getLogger().error(
-                  String.format("Builder (%d:%d) ERROR - Starting and missing work order(%d)",
-                    worker.getColony().getID(),
-                    worker.getCitizenData().getId(), job.getWorkOrderId()));
+                        String.format("Builder (%d:%d) ERROR - Starting and missing work order(%d)",
+                                worker.getColony().getID(),
+                                worker.getCitizenData().getId(), job.getWorkOrderId()));
                 return;
             }
 
             if (wo instanceof WorkOrderBuildDecoration)
             {
-                LanguageHandler.sendPlayersMessage(worker.getColony().getMessageEntityPlayers(),
+                LanguageHandler.sendPlayersLocalizedMessage(worker.getColony().getMessageEntityPlayers(),
                         "entity.builder.messageBuildStart",
                         job.getStructure().getName());
             }
@@ -129,12 +129,12 @@ public class EntityAIStructureBuilder extends AbstractEntityAIStructure<JobBuild
                 if (building == null)
                 {
                     Log.getLogger().error(
-                      String.format("Builder (%d:%d) ERROR - Starting and missing building(%s)",
-                        worker.getColony().getID(), worker.getCitizenData().getId(), wo.getBuildingLocation()));
+                            String.format("Builder (%d:%d) ERROR - Starting and missing building(%s)",
+                                    worker.getColony().getID(), worker.getCitizenData().getId(), wo.getBuildingLocation()));
                     return;
                 }
 
-                LanguageHandler.sendPlayersMessage(worker.getColony().getMessageEntityPlayers(),
+                LanguageHandler.sendPlayersLocalizedMessage(worker.getColony().getMessageEntityPlayers(),
                         "entity.builder.messageBuildStart",
                         job.getStructure().getName());
 
@@ -166,4 +166,5 @@ public class EntityAIStructureBuilder extends AbstractEntityAIStructure<JobBuild
     {
         return ACTIONS_UNTIL_DUMP;
     }
+
 }

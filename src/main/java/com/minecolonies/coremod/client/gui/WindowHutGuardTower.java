@@ -35,7 +35,7 @@ public class WindowHutGuardTower extends AbstractWindowWorkerBuilding<BuildingGu
     /**
      * Id of the switch job button in the GUI.
      */
-    private static final String BUTTON_JOB   = "job";
+    private static final String BUTTON_JOB = "job";
 
     /**
      * Id of the switch assignment mode button in the GUI - (Manually / Automatically).
@@ -74,10 +74,10 @@ public class WindowHutGuardTower extends AbstractWindowWorkerBuilding<BuildingGu
 
     private static final String VIEW_PAGES                      = "pages";
     private static final String HUT_GUARD_TOWER_RESOURCE_SUFFIX = ":gui/windowhutguardtower.xml";
-    private static final String AUTO                            = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.modeA");
-    private static final String MANUAL                          = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.modeM");
-    private static final String ON                              = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.retrieveOn");
-    private static final String OFF                             = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.retrieveOff");
+    private static final String AUTO   = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.modeA");
+    private static final String MANUAL = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.modeM");
+    private static final String ON  = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.retrieveOn");
+    private static final String OFF = LanguageHandler.format("com.minecolonies.coremod.gui.workerHuts.retrieveOff");
     /**
      * Buttons used in the application.
      */
@@ -88,7 +88,7 @@ public class WindowHutGuardTower extends AbstractWindowWorkerBuilding<BuildingGu
     /**
      * Assign the job manually, knight or ranger.
      */
-    private boolean                     assignManually      = false;
+    private boolean assignManually = false;
     /**
      * Retrieve the guard ON low health.
      */
@@ -268,18 +268,18 @@ public class WindowHutGuardTower extends AbstractWindowWorkerBuilding<BuildingGu
 
         if (emptySlot == -1)
         {
-            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.gui.workerHuts.noSpace");
+            LanguageHandler.sendPlayerLocalizedMessage(player, "com.minecolonies.coremod.gui.workerHuts.noSpace");
         }
 
         if (patrolManually && task.equals(BuildingGuardTower.Task.PATROL))
         {
             givePlayerScepter(BuildingGuardTower.Task.PATROL);
-            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.job.guard.tool.taskPatrol");
+            LanguageHandler.sendPlayerLocalizedMessage(player, "com.minecolonies.coremod.job.guard.tool.taskPatrol");
         }
         else if (task.equals(BuildingGuardTower.Task.GUARD))
         {
             givePlayerScepter(BuildingGuardTower.Task.GUARD);
-            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.job.guard.tool.taskGuard");
+            LanguageHandler.sendPlayerLocalizedMessage(player, "com.minecolonies.coremod.job.guard.tool.taskGuard");
         }
         window.close();
     }

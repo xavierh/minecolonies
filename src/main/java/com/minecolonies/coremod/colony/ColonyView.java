@@ -27,26 +27,26 @@ public final class ColonyView implements IColony
 {
     //  General Attributes
     private final int id;
-    private final Map<Integer, WorkOrderView>          workOrders  = new HashMap<>();
+    private final Map<Integer, WorkOrderView> workOrders = new HashMap<>();
     //  Administration/permissions
     @NotNull
-    private final Permissions.View                     permissions = new Permissions.View();
+    private final Permissions.View permissions  = new Permissions.View();
     @NotNull
     private final Map<BlockPos, AbstractBuilding.View> buildings   = new HashMap<>();
     //  Citizenry
     @NotNull
     private final Map<Integer, CitizenDataView>        citizens    = new HashMap<>();
-    private       String                               name        = "Unknown";
+    private       String                      name       = "Unknown";
     private int      dimensionId;
     private BlockPos center;
     /**
      * Defines if workers are hired manually or automatically.
      */
-    private boolean manualHiring = false;
+    private       boolean          manualHiring = false;
     //  Buildings
     @Nullable
     private BuildingTownHall.View townHall;
-    private int maxCitizens = 0;
+    private       int                                  maxCitizens = 0;
 
     /**
      * Base constructor for a colony.
@@ -254,7 +254,6 @@ public final class ColonyView implements IColony
      * @param isNewSubscription Whether this is a new subscription of not.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyViewMessage(@NotNull final ByteBuf buf, final boolean isNewSubscription)
     {
         //  General Attributes
@@ -281,7 +280,6 @@ public final class ColonyView implements IColony
      * @param buf buffer containing permissions.
      * @return null == no response
      */
-    @Nullable
     public IMessage handlePermissionsViewMessage(@NotNull final ByteBuf buf)
     {
         permissions.deserialize(buf);
@@ -295,14 +293,10 @@ public final class ColonyView implements IColony
      * @param buf Network data.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyViewWorkOrderMessage(final ByteBuf buf)
     {
         @Nullable final WorkOrderView workOrder = AbstractWorkOrder.createWorkOrderView(buf);
-        if (workOrder != null)
-        {
-            workOrders.put(workOrder.getId(), workOrder);
-        }
+        workOrders.put(workOrder.getId(), workOrder);
 
         return null;
     }
@@ -315,7 +309,6 @@ public final class ColonyView implements IColony
      * @param buf Network data.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyViewCitizensMessage(final int id, final ByteBuf buf)
     {
         final CitizenDataView citizen = CitizenData.createCitizenDataView(id, buf);
@@ -333,7 +326,6 @@ public final class ColonyView implements IColony
      * @param citizen citizen ID.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyViewRemoveCitizenMessage(final int citizen)
     {
         citizens.remove(citizen);
@@ -346,7 +338,6 @@ public final class ColonyView implements IColony
      * @param buildingId location of the building.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyViewRemoveBuildingMessage(final BlockPos buildingId)
     {
         final AbstractBuilding.View building = buildings.remove(buildingId);
@@ -363,7 +354,6 @@ public final class ColonyView implements IColony
      * @param workOrderId id of the workOrder.
      * @return null == no response
      */
-    @Nullable
     public IMessage handleColonyViewRemoveWorkOrderMessage(final int workOrderId)
     {
         workOrders.remove(workOrderId);
@@ -379,7 +369,6 @@ public final class ColonyView implements IColony
      * @param buf        buffer containing ColonyBuilding information.
      * @return null == no response.
      */
-    @Nullable
     public IMessage handleColonyBuildingViewMessage(final BlockPos buildingId, @NotNull final ByteBuf buf)
     {
         @Nullable final AbstractBuilding.View building = AbstractBuilding.createBuildingView(this, buildingId, buf);

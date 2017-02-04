@@ -6,6 +6,7 @@ import com.minecolonies.coremod.colony.buildings.AbstractBuilding;
 import com.minecolonies.coremod.colony.buildings.BuildingFarmer;
 import com.minecolonies.coremod.colony.buildings.BuildingHome;
 import com.minecolonies.coremod.colony.buildings.BuildingTownHall;
+import com.minecolonies.coremod.colony.materials.MaterialSystem;
 import com.minecolonies.coremod.colony.permissions.Permissions;
 import com.minecolonies.coremod.colony.workorders.AbstractWorkOrder;
 import com.minecolonies.coremod.configuration.Configurations;
@@ -20,6 +21,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTUtil;
@@ -79,6 +81,7 @@ public class Colony implements IColony
     private final List<Achievement> colonyAchievements;
     //  Workload and Jobs
     private final WorkManager                     workManager      = new WorkManager(this);
+    private final MaterialSystem                  materialSystem   = new MaterialSystem();
     @NotNull
     private final Map<BlockPos, AbstractBuilding> buildings        = new HashMap<>();
     //  Citizenry
@@ -95,16 +98,16 @@ public class Colony implements IColony
     private       boolean                         isBuildingsDirty = false;
     private       boolean                         manualHiring     = false;
     private       boolean                         isFieldsDirty    = false;
-    private       String                          name             = "ERROR(Wasn't placed by player)";
+    private       String              name             = "ERROR(Wasn't placed by player)";
     private BlockPos         center;
     //  Administration/permissions
     @NotNull
     private Permissions      permissions;
     @Nullable
     private BuildingTownHall townHall;
-    private int topCitizenId = 0;
-    private int maxCitizens  = Configurations.maxCitizens;
-    private int killedMobs   = 0;
+    private       int                             topCitizenId = 0;
+    private       int                             maxCitizens  = Configurations.maxCitizens;
+    private       int                             killedMobs   = 0;
 
     /**
      * Constructor for a newly created Colony.
@@ -352,6 +355,92 @@ public class Colony implements IColony
     }
 
     /**
+     * Returns the center of the colony.
+     *
+     * @return Chunk Coordinates of the center of the colony.
+     */
+    @Override
+    public BlockPos getCenter()
+    {
+        return center;
+    }
+
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
+    /**
+     * Sets the name of the colony.
+     * Marks dirty.
+     *
+     * @param n new name.
+     */
+    public void setName(final String n)
+    {
+        name = n;
+        markDirty();
+    }
+
+    /**
+     * Marks the instance dirty.
+     */
+    private void markDirty()
+    {
+        isDirty = true;
+    }
+
+    @NotNull
+    @Override
+    public Permissions getPermissions()
+    {
+        return permissions;
+    }
+
+    @Override
+    public boolean isCoordInColony(@NotNull final World w, @NotNull final BlockPos pos)
+    {
+        //  Perform a 2D distance calculation, so pass center.posY as the Y
+        return w.equals(getWorld())
+                 && BlockPosUtil.getDistanceSquared(center, new BlockPos(pos.getX(), center.getY(), pos.getZ())) <= MathUtils.square(Configurations.workingRangeTownHall);
+    }
+
+    /**
+     * Returns the world the colony is in.
+     *
+     * @return World the colony is in.
+     */
+    @Nullable
+    public World getWorld()
+    {
+        return world;
+    }
+
+    @Override
+    public long getDistanceSquared(@NotNull final BlockPos pos)
+    {
+        return BlockPosUtil.getDistanceSquared2D(center, pos);
+    }
+
+    @Override
+    public boolean hasTownHall()
+    {
+        return townHall != null;
+    }
+
+    /**
+     * Returns the ID of the colony.
+     *
+     * @return Colony ID.
+     */
+    @Override
+    public int getID()
+    {
+        return id;
+    }
+
+    /**
      * Increment the mobs killed by this colony.
      * <p>
      * Will award achievements for mobs killed.
@@ -409,6 +498,14 @@ public class Colony implements IColony
         this.colonyAchievements.add(achievement);
 
         AchievementUtils.syncAchievements(this);
+    }
+
+    /**
+     * Marks citizen data dirty.
+     */
+    public void markCitizensDirty()
+    {
+        isCitizensDirty = true;
     }
 
     /**
@@ -703,6 +800,7 @@ public class Colony implements IColony
               .filter(ColonyUtils::isCitizenMissingFromWorld)
               .forEach(CitizenData::clearCitizenEntity);
 
+            // TODO evaluate if this block is needed anymore
             //  Cleanup disappeared citizens
             //  It would be really nice if we didn't have to do this... but Citizens can disappear without dying!
             //  Every CITIZEN_CLEANUP_TICK_INCREMENT, cleanup any 'lost' citizens
@@ -710,7 +808,7 @@ public class Colony implements IColony
             {
                 //  All chunks within a good range of the colony should be loaded, so all citizens should be loaded
                 //  If we don't have any references to them, destroy the citizen
-                citizens.values().forEach(this::spawnCitizenIfNull);
+                citizens.values().forEach(CitizenData::getCitizenEntity);
             }
 
             //  Cleanup Buildings whose Blocks have gone AWOL
@@ -821,113 +919,6 @@ public class Colony implements IColony
     }
 
     /**
-     * Returns the center of the colony.
-     *
-     * @return Chunk Coordinates of the center of the colony.
-     */
-    @Override
-    public BlockPos getCenter()
-    {
-        return center;
-    }
-
-    @Override
-    public String getName()
-    {
-        return name;
-    }
-
-    /**
-     * Sets the name of the colony.
-     * Marks dirty.
-     *
-     * @param n new name.
-     */
-    public void setName(final String n)
-    {
-        name = n;
-        markDirty();
-    }
-
-    /**
-     * Marks the instance dirty.
-     */
-    private void markDirty()
-    {
-        isDirty = true;
-    }
-
-    @NotNull
-    @Override
-    public Permissions getPermissions()
-    {
-        return permissions;
-    }
-
-    @Override
-    public boolean isCoordInColony(@NotNull final World w, @NotNull final BlockPos pos)
-    {
-        //  Perform a 2D distance calculation, so pass center.posY as the Y
-        return w.equals(getWorld())
-                 && BlockPosUtil.getDistanceSquared(center, new BlockPos(pos.getX(), center.getY(), pos.getZ())) <= MathUtils.square(Configurations.workingRangeTownHall);
-    }
-
-    /**
-     * Returns the world the colony is in.
-     *
-     * @return World the colony is in.
-     */
-    @Nullable
-    public World getWorld()
-    {
-        return world;
-    }
-
-    @Override
-    public long getDistanceSquared(@NotNull final BlockPos pos)
-    {
-        return BlockPosUtil.getDistanceSquared2D(center, pos);
-    }
-
-    @Override
-    public boolean hasTownHall()
-    {
-        return townHall != null;
-    }
-
-    /**
-     * Returns the ID of the colony.
-     *
-     * @return Colony ID.
-     */
-    @Override
-    public int getID()
-    {
-        return id;
-    }
-
-    /**
-     * Updates all subscribers of fields etc.
-     */
-    private void markFieldsDirty()
-    {
-        isFieldsDirty = true;
-    }
-
-    /**
-     * Spawn citizen if his entity is null.
-     * @param data his data
-     */
-    public void spawnCitizenIfNull(@NotNull final CitizenData data)
-    {
-        if(data.getCitizenEntity() == null)
-        {
-            Log.getLogger().warn(String.format("Citizen #%d:%d has gone AWOL, respawning them!", this.getID(), data.getId()));
-            spawnCitizen(data);
-        }
-    }
-
-    /**
      * Spawn a citizen with specific citizen data.
      *
      * @param data Data to use to spawn citizen.
@@ -969,7 +960,7 @@ public class Colony implements IColony
                 if (getMaxCitizens() == getCitizens().size())
                 {
                     //TODO: add Colony Name prefix?
-                    LanguageHandler.sendPlayersMessage(
+                    LanguageHandler.sendPlayersLocalizedMessage(
                             this.getMessageEntityPlayers(),
                             "tile.blockHutTownHall.messageMaxSize");
                 }
@@ -983,45 +974,6 @@ public class Colony implements IColony
 
             markCitizensDirty();
         }
-    }
-
-    /**
-     * Returns the max amount of citizens in the colony.
-     *
-     * @return Max amount of citizens.
-     */
-    public int getMaxCitizens()
-    {
-        return maxCitizens;
-    }
-
-    /**
-     * Get citizen by ID.
-     *
-     * @param citizenId ID of the Citizen.
-     * @return CitizenData associated with the ID, or null if it was not found.
-     */
-    public CitizenData getCitizen(final int citizenId)
-    {
-        return citizens.get(citizenId);
-    }
-
-    /**
-     * Returns a map of citizens in the colony.
-     * The map has ID as key, and citizen data as value.
-     *
-     * @return Map of citizens in the colony, with as key the citizen ID, and as value the citizen data.
-     */
-    @NotNull
-    public Map<Integer, CitizenData> getCitizens()
-    {
-        return Collections.unmodifiableMap(citizens);
-    }
-
-    @NotNull
-    public List<EntityPlayer> getMessageEntityPlayers()
-    {
-        return ServerUtils.getPlayersFromUUID(this.world, this.getPermissions().getMessagePlayers());
     }
 
     /**
@@ -1051,14 +1003,6 @@ public class Colony implements IColony
         {
             this.triggerAchievement(ModAchievements.achievementSizeMetropolis);
         }
-    }
-
-    /**
-     * Marks citizen data dirty.
-     */
-    public void markCitizensDirty()
-    {
-        isCitizensDirty = true;
     }
 
     /**
@@ -1114,6 +1058,14 @@ public class Colony implements IColony
             }
         }
         return null;
+    }
+
+    /**
+     * Updates all subscribers of fields etc.
+     */
+    private void markFieldsDirty()
+    {
+        isFieldsDirty = true;
     }
 
     /**
@@ -1283,6 +1235,28 @@ public class Colony implements IColony
     }
 
     /**
+     * Returns the max amount of citizens in the colony.
+     *
+     * @return Max amount of citizens.
+     */
+    public int getMaxCitizens()
+    {
+        return maxCitizens;
+    }
+
+    /**
+     * Returns a map of citizens in the colony.
+     * The map has ID as key, and citizen data as value.
+     *
+     * @return Map of citizens in the colony, with as key the citizen ID, and as value the citizen data.
+     */
+    @NotNull
+    public Map<Integer, CitizenData> getCitizens()
+    {
+        return Collections.unmodifiableMap(citizens);
+    }
+
+    /**
      * Removes a citizen from the colony.
      *
      * @param citizen Citizen data to remove.
@@ -1321,6 +1295,17 @@ public class Colony implements IColony
     }
 
     /**
+     * Get citizen by ID.
+     *
+     * @param citizenId ID of the Citizen.
+     * @return CitizenData associated with the ID, or null if it was not found.
+     */
+    public CitizenData getCitizen(final int citizenId)
+    {
+        return citizens.get(citizenId);
+    }
+
+    /**
      * Get the first unemployed citizen.
      *
      * @return Citizen with no current job.
@@ -1349,6 +1334,12 @@ public class Colony implements IColony
                  .collect(Collectors.toList());
     }
 
+    @NotNull
+    public MaterialSystem getMaterialSystem()
+    {
+        return materialSystem;
+    }
+
     /**
      * Performed when a building of this colony finished his upgrade state.
      *
@@ -1358,6 +1349,12 @@ public class Colony implements IColony
     public void onBuildingUpgradeComplete(@NotNull final AbstractBuilding building, final int level)
     {
         building.onUpgradeComplete(level);
+    }
+
+    @NotNull
+    public List<EntityPlayer> getMessageEntityPlayers()
+    {
+        return ServerUtils.getPlayersFromUUID(this.world, this.getPermissions().getMessagePlayers());
     }
 
     @NotNull

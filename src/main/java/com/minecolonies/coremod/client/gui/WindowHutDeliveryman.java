@@ -28,4 +28,5 @@ public class WindowHutDeliveryman extends AbstractWindowWorkerBuilding<BuildingD
     {
         return "com.minecolonies.coremod.gui.workerHuts.warehouse";
     }
+
 }

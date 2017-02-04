@@ -12,7 +12,6 @@ public class ClientEventHandler
 {
     /**
      * Used to catch the renderWorldLastEvent in order to draw the debug nodes for pathfinding.
-     *
      * @param event the catched event.
      */
     @SubscribeEvent
