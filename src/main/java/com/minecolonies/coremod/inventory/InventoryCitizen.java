@@ -541,7 +541,154 @@ public class InventoryCitizen implements IInventory
             {
                 return i;
             }
+<<<<<<< HEAD
             else
+=======
+
+            tempIndex -= nonnulllist1.size();
+        }
+
+        if (nonnulllist != null)
+        {
+            nonnulllist.set(tempIndex, stack);
+        }
+    }
+
+    /**
+     * Contains the maximum stack size for a inventory slot. Seems to always be 64, possibly will be extended.
+     *
+     * @return the stack size.
+     */
+    @Override
+    public int getInventoryStackLimit()
+    {
+        return MAX_STACK_SIZE;
+    }
+
+    /**
+     * For tile entities, ensures the chunk containing the tile entity is saved to disk later - the game won't think it
+     * hasn't changed and skip it.
+     */
+    @Override
+    public void markDirty()
+    {
+        this.inventoryChanged = true;
+        if (this.citizen != null)
+        {
+            this.citizen.onInventoryChanged();
+        }
+    }
+
+    /**
+     * Do not give this method the name canInteractWith because it clashes with Container.
+     *
+     * @param player the player acessing the inventory.
+     * @return if the player is allowed to access.
+     */
+    @Override
+    public boolean isUsableByPlayer(@NotNull final EntityPlayer player)
+    {
+        return this.citizen.getColony().getPermissions().hasPermission(player, Permissions.Action.ACCESS_HUTS);
+    }
+
+    /**
+     * Called when inventory is opened by a player.
+     *
+     * @param player the player who opened the inventory.
+     */
+    @Override
+    public void openInventory(final EntityPlayer player)
+    {
+        /*
+         * This may be filled in order to specify some custom handling.
+         */
+    }
+
+    /**
+     * Called after the inventory has been closed by a player.
+     *
+     * @param player the player who opened the inventory.
+     */
+    @Override
+    public void closeInventory(final EntityPlayer player)
+    {
+        /*
+         * This may be filled in order to specify some custom handling.
+         */
+    }
+
+    /**
+     * Returns true if automation is allowed to insert the given stack (ignoring stack size) into the given slot.
+     *
+     * @param index the accessing slot.
+     * @param stack the stack trying to enter.
+     * @return if the stack may be inserted.
+     */
+    @Override
+    public boolean isItemValidForSlot(final int index, final ItemStack stack)
+    {
+        return true;
+    }
+
+    /**
+     * This may be used in order to return values of different GUI areas like the ones in the beacon.
+     *
+     * @param id the id of the field.
+     * @return the value of the field.
+     */
+    @Override
+    public int getField(final int id)
+    {
+        return 0;
+    }
+
+    /**
+     * This may be used to set GUI areas with a certain id and value.
+     *
+     * @param id    some id.
+     * @param value some value.
+     */
+    @Override
+    public void setField(final int id, final int value)
+    {
+        /*
+         * We currently need no fields.
+         */
+    }
+
+    /**
+     * Returns the number of fields.
+     *
+     * @return the amount.
+     */
+    @Override
+    public int getFieldCount()
+    {
+        return 0;
+    }
+
+    /**
+     * Clears the whole inventory.
+     */
+    @Override
+    public void clear()
+    {
+        for (List<ItemStack> list : this.allInventories)
+        {
+            list.clear();
+        }
+    }
+
+    /**
+     * Decrement the number of animations remaining. Only called on client side. This is used to handle the animation of
+     * receiving a block.
+     */
+    public void decrementAnimations()
+    {
+        for (NonNullList<ItemStack> nonnulllist : this.allInventories)
+        {
+            for (int i = 0; i < nonnulllist.size(); ++i)
+>>>>>>> 5b4241e2ae395db4983475e8307ce2a594d752aa
             {
                 i = i - k;
                 itemstack.grow(k);
@@ -1058,3 +1205,4 @@ public class InventoryCitizen implements IInventory
         }
     }
 }
+

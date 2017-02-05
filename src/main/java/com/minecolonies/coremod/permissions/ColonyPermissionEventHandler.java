@@ -9,6 +9,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemMonsterPlacer;
@@ -278,7 +279,11 @@ public class ColonyPermissionEventHandler
     public void on(final AttackEntityEvent event)
     {
         final EntityPlayer playerIn = event.getEntityPlayer();
+<<<<<<< HEAD
         if (Configurations.enableColonyProtection && colony.isCoordInColony(playerIn.getEntityWorld(), playerIn.getPosition()) && event.getTarget() instanceof EntityCitizen )
+=======
+        if (Configurations.enableColonyProtection && !(event.getEntity() instanceof EntityMob) && colony.isCoordInColony(playerIn.getEntityWorld(), playerIn.getPosition()))
+>>>>>>> 5b4241e2ae395db4983475e8307ce2a594d752aa
         {
             final Permissions.Rank rank = colony.getPermissions().getRank(playerIn);
 
