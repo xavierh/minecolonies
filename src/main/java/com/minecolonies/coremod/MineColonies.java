@@ -8,6 +8,7 @@ import com.minecolonies.coremod.lib.Constants;
 import com.minecolonies.coremod.network.messages.*;
 import com.minecolonies.coremod.proxy.IProxy;
 import com.minecolonies.coremod.util.RecipeHandler;
+import com.minecolonies.coremod.villages.VillageHandlerControlPoint;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -106,6 +107,8 @@ public class MineColonies
         proxy.registerRenderer();
 
         ModAchievements.init();
+
+        VillageHandlerControlPoint.init();
     }
 
     private static synchronized void initializeNetwork()

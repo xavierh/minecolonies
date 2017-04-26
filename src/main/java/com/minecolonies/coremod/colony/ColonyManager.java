@@ -32,6 +32,8 @@ import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import net.minecraft.village.Village;
+
 /**
  * Singleton class that links colonies to minecraft.
  */
@@ -533,6 +535,8 @@ public final class ColonyManager
             c.onServerTick(event);
         }
 
+        VillageManager.onServerTick(event);
+
         if (saveNeeded)
         {
             saveColonies();
@@ -603,6 +607,8 @@ public final class ColonyManager
         {
             compound.setUniqueId(TAG_UUID, serverUUID);
         }
+
+        VillageManager.writeToNBT(compound);
     }
 
     /**
@@ -712,6 +718,15 @@ public final class ColonyManager
                 {
                     Log.getLogger().info(String.format("Server UUID %s", serverUUID));
                 }
+
+                Log.getLogger().info("Nb Villages: " + world.getVillageCollection().getVillageList().size());
+                for (Village village : world.getVillageCollection().getVillageList())
+                {
+                    Log.getLogger().info("Position: " + village.getCenter());
+                    Log.getLogger().info("Villagers: " + village.getNumVillagers());
+                    Log.getLogger().info("Radius " + village.getVillageRadius());
+
+                }
             }
             ++numWorldsLoaded;
 
@@ -768,6 +783,8 @@ public final class ColonyManager
         }
 
         Log.getLogger().info(String.format("Loaded %d colonies", colonies.size()));
+
+        VillageManager.readFromNBT(compound);
     }
 
     private static void addColonyByWorld(Colony colony)

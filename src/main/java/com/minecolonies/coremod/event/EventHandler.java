@@ -31,6 +31,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.minecolonies.coremod.colony.VillageManager;
+import com.minecolonies.coremod.colony.Village;
+import net.minecraft.entity.passive.EntityVillager;
+//import net.minecraft.village.Village;
+
 /**
  * Handles all forge events.
  */
@@ -154,6 +159,84 @@ public class EventHandler
 
             handleEventCancellation(event, player);
         }
+    }
+
+    @SubscribeEvent
+    public void entityInteractEvent(PlayerInteractEvent.EntityInteract event)
+    {
+        if (FMLCommonHandler.instance().getEffectiveSide().isClient())
+            return;
+
+        Log.getLogger().info("entityInteractEvent: " + event);
+        if (event.getTarget() instanceof EntityVillager)
+        {
+
+            //First we get his village
+            Village village = VillageManager.getVillage(event.getTarget().getPosition());
+            if (village == null)
+            {
+                  net.minecraft.village.Village v = event.getWorld().getVillageCollection().getNearestVillage(event.getTarget().getPosition(), 32);
+                  if (v != null)
+                  {
+                     //we need to add it to VillageManager
+                     village = new Village(v.getCenter(), v.getNumVillagers(), v.getVillageRadius());
+                     VillageManager.addVillage(village);
+                     LanguageHandler.sendPlayerMessage(event.getEntityPlayer(), "A new village have been discovered " + village.getPosition());
+                  }
+            }
+            if (village != null)
+            {
+                // them we check if it does exist int the village manager
+                final IColony colony = ColonyManager.getIColonyByOwner(event.getWorld(), event.getEntityPlayer().getUniqueID());
+                if (village.isClaimed())
+                {
+                    LanguageHandler.sendPlayerMessage(event.getEntityPlayer(), "The village is already claimed " + village.getPosition());
+                }
+                else
+                {
+                    village.claim(colony);
+                    LanguageHandler.sendPlayerMessage(event.getEntityPlayer(), "A new village have been claimed " + village.getPosition());
+                }
+            }
+            // them we check if it does exist
+            // we create it if needed
+            //then we claim it
+            Log.getLogger().info("entityInteractEvent: EntityVillager");
+            Log.getLogger().info("entityInteractEvent: world " + event.getWorld());
+            Log.getLogger().info("entityInteractEvent: getVillageCollection " + event.getWorld().getVillageCollection());
+
+
+            Log.getLogger().info("Nb Villages: " + event.getWorld().getVillageCollection().getVillageList().size());
+                for (net.minecraft.village.Village v : event.getWorld().getVillageCollection().getVillageList())
+                {
+                    Log.getLogger().info("Position: " + v.getCenter());
+                    Log.getLogger().info("Villagers: " + v.getNumVillagers());
+                    Log.getLogger().info("Radius " + v.getVillageRadius());
+
+                }
+//            BlockPos blockpos = new BlockPos(event.getTarget().getPos());
+/*            Village village = event.getWorld().getVillageCollection().getNearestVillage(blockpos, 32);
+            if (village != null)
+            {
+                Log.getLogger().info("entityInteractEvent: village " + village);
+            }
+*/
+        }
+
+
+
+//        event.entityPlayer.
+/*        UserIdent ident = UserIdent.get(event.entityPlayer);
+        WorldPoint point = new WorldPoint(event.entityPlayer.dimension, (int) event.target.posX, (int) event.target.posY, (int) event.target.posZ);
+        String permission = ModuleProtection.PERM_INTERACT_ENTITY + "." + EntityList.getEntityString(event.target);
+        if (ModuleProtection.isDebugMode(event.entityPlayer))
+            ChatOutputHandler.chatNotification(event.entityPlayer, permission);
+        if (!APIRegistry.perms.checkUserPermission(ident, point, ModuleProtection.PERM_INTERACT_ENTITY))
+        {
+            event.setCanceled(true);
+            return;
+        }
+*/
     }
 
     /**
