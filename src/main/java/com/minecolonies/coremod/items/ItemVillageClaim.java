@@ -2,14 +2,19 @@ package com.minecolonies.coremod.items;
 
 import com.minecolonies.coremod.achievements.ModAchievements;
 import com.minecolonies.coremod.blocks.ModBlocks;
+import com.minecolonies.coremod.colony.Colony;
+import com.minecolonies.coremod.colony.buildings.BuildingTownHall;
+import com.minecolonies.coremod.colony.IColony;
 import com.minecolonies.coremod.colony.ColonyManager;
 import com.minecolonies.coremod.configuration.Configurations;
 import com.minecolonies.coremod.creativetab.ModCreativeTabs;
 import com.minecolonies.coremod.lib.Constants;
 import com.minecolonies.coremod.util.LanguageHandler;
 import com.minecolonies.coremod.util.Log;
+import com.minecolonies.coremod.util.BlockPosUtil;
 import com.minecolonies.coremod.util.StructureWrapper;
 import net.minecraft.block.BlockChest;
+import net.minecraft.init.Blocks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -57,109 +62,80 @@ public class ItemVillageClaim extends AbstractItemMinecolonies
             return EnumActionResult.FAIL;
         }
 
-        //we need to check that we don't place it in someone else colony
-        // that a village exist
-
-
-/*        final EnumFacing dir = player.getHorizontalFacing();
-        if (spawnCamp(worldIn, pos, dir))
+        if (canClaimVillage(player, worldIn, pos))
         {
-            worldIn.setBlockState(pos.up(), Blocks.CHEST.getDefaultState().withProperty(BlockChest.FACING, dir));
-
-            stack.setCount(stack.getCount()-1);
-            player.addStat(ModAchievements.achievementGetSupply);
-
+            //todo ?
             return EnumActionResult.SUCCESS;
         }
-        LanguageHandler.sendPlayerMessage(player, "item.supplyCampDeployer.invalid");
-        return EnumActionResult.FAIL;
-*/
+
         return EnumActionResult.SUCCESS;
     }
 
-    /**
-     * Checks if the player already placed a supply chest.
-     *
-     * @param player the player.
-     * @return boolean, returns true when player hasn't placed before, or when infinite placing is on.
-     */
-    /*private static boolean isFirstPlacing(@NotNull final EntityPlayer player)
-    {
-        if (Configurations.allowInfiniteSupplyChests || !player.hasAchievement(ModAchievements.achievementGetSupply))
-        {
-            return true;
-        }
-        LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.error.supplyChestAlreadyPlaced");
-        return false;
-    }*/
 
     /**
-     * Spawns the ship and supply chest.
+     * check that the player can claim the village.
      *
-     * @param world world obj.
-     * @param pos   coordinate clicked.
+     * The player should have a townhall level 1 at least
+     * Should be in a village radius.
+     * Should not be in a colony.
+     * Should be in tax radius.
+     * Should not be already claimed
+     * Should not have other players guard near by
+     * @return true when we can claim the village
      */
-    /*private boolean spawnCamp(@NotNull final World world, @NotNull final BlockPos pos, @NotNull final EnumFacing chestFacing)
+    private static boolean canClaimVillage(@NotNull final EntityPlayer player, @NotNull final World worldIn, @NotNull final BlockPos pos)
     {
-        if (isInsideAColony(world, pos))
+        // Check that The player has a colony
+        final IColony iColony = ColonyManager.getIColonyByOwner(worldIn, player);
+        final Colony colony = iColony == null ? null : ColonyManager.getColony(iColony.getID());
+
+        if (colony == null)
         {
+            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.error.villageClaimWithoutColony");
             return false;
         }
-        return checkAndPlaceSupplyCamp(world, pos, chestFacing);
+
+        // check for a village nearby
+        net.minecraft.village.Village village = worldIn.getVillageCollection().getNearestVillage(pos, 32);
+        if (village == null || village.getVillageRadius() * village.getVillageRadius() > BlockPosUtil.getDistanceSquared(village.getCenter(), pos))
+        {
+            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.error.villageClaimNoVillage");
+            return false;
+        }
+
+        //Check that we are not in a colony
+        if (ColonyManager.isCoordinateInAnyColony(worldIn, pos))
+        {
+            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.error.villageClaimInColony");
+            return false;
+        }
+
+        // Check that we are in tax radius
+        final BuildingTownHall townHall = colony.getTownHall();
+        if (townHall != null && townHall.getTaxRadius() * townHall.getTaxRadius() > BlockPosUtil.getDistanceSquared(colony.getCenter(), pos))
+        {
+            LanguageHandler.sendPlayerMessage(player, "com.minecolonies.coremod.error.villageClaimTooFar");
+            return false;
+        }
+
+        // check that we don't have guard around
+        // TODO
+        return true;
     }
 
-    private boolean checkAndPlaceSupplyCamp(final World world, @NotNull final BlockPos pos, @NotNull final EnumFacing direction)
+    //Temporary for testing
+    private static void buildClaim(@NotNull final EntityPlayer player, @NotNull final World worldIn, @NotNull final BlockPos pos)
     {
-        EnumFacing facing = direction;
-        for (int i = 0; i < CHECK_X_DIRECTIONS; i++)
-        {
-            switch (facing)
-            {
-                case NORTH:
-                    if (StructureWrapper.tryToLoadAndPlaceSupplyCampWithRotation(world, SUPPLY_CAMP_STRUCTURE_NAME,
-                            pos.add(OFFSET_NORTH_EAST, 0, OFFSET_NORTH_WEST), Constants.ROTATE_THREE_TIMES, Mirror.NONE))
-                    {
-                        return true;
-                    }
-                    facing = EnumFacing.WEST;
-                    break;
-                case EAST:
-                    if (StructureWrapper.tryToLoadAndPlaceSupplyCampWithRotation(world, SUPPLY_CAMP_STRUCTURE_NAME,
-                            pos.add(OFFSET_SOUTH_EAST, 0, OFFSET_NORTH_EAST), Constants.ROTATE_0_TIMES, Mirror.NONE))
-                    {
-                        return true;
-                    }
-                    facing = EnumFacing.NORTH;
-                    break;
-                case WEST:
-                    if (StructureWrapper.tryToLoadAndPlaceSupplyCampWithRotation(world, SUPPLY_CAMP_STRUCTURE_NAME,
-                            pos.add(OFFSET_NORTH_WEST, 0, OFFSET_SOUTH_WEST), Constants.ROTATE_TWICE, Mirror.NONE))
-                    {
-                        return true;
-                    }
-                    facing = EnumFacing.SOUTH;
-                    break;
-                default:
-                    if (StructureWrapper.tryToLoadAndPlaceSupplyCampWithRotation(world, SUPPLY_CAMP_STRUCTURE_NAME,
-                            pos.add(OFFSET_SOUTH_WEST, 0, OFFSET_SOUTH_EAST), Constants.ROTATE_ONCE, Mirror.NONE))
-                    {
-                        return true;
-                    }
-                    facing = EnumFacing.EAST;
-            }
-        }
-        return false;
-    }*/
+        BlockPos currentPosition = pos.up().up();
+        worldIn.setBlockState(currentPosition, Blocks.OAK_FENCE.getDefaultState());
+        currentPosition = pos.up();
+        worldIn.setBlockState(currentPosition, Blocks.OAK_FENCE.getDefaultState());
+        currentPosition = pos.up();
+        worldIn.setBlockState(currentPosition, Blocks.OAK_GLOWSTONE.getDefaultState());
+        currentPosition = pos.left();
+        worldIn.setBlockState(currentPosition, Blocks.WALL_BANNER.getDefaultState());
 
-    /**
-     * Check if any of the coordinates is in any colony.
-     *
-     * @param world the world to check in.
-     * @param pos   the first position.
-     * @return false if no colony found.
-     */
-    /*private static boolean isInsideAColony(final World world, final BlockPos pos)
-    {
-        return ColonyManager.isCoordinateInAnyColony(world, pos);
-    }*/
+
+
+    }
 }

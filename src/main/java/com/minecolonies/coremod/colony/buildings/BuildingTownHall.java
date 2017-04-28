@@ -84,4 +84,13 @@ public class BuildingTownHall extends AbstractBuildingHut
             return new WindowTownHall(this);
         }
     }
+
+    /**
+     * get the radius where tax is applicable.
+     */
+    public int getTaxRadius()
+    {
+        //TODO
+        return 500 * getBuildingLevel();
+    }
 }
