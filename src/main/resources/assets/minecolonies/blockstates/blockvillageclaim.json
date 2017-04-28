@@ -1,0 +1,23 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "minecolonies:blockVillageClaim"
+    },
+    "facing=east": {
+      "model": "minecolonies:blockVillageClaim",
+      "y": 0
+    },
+    "facing=south": {
+      "model": "minecolonies:blockVillageClaim",
+      "y": 90
+    },
+    "facing=west": {
+      "model": "minecolonies:blockVillageClaim",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "minecolonies:blockVillageClaim",
+      "y": 270
+    }
+  }
+}
