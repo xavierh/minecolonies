@@ -79,7 +79,7 @@ public final class VillageManager
     public static void onServerTick(@NotNull final TickEvent.ServerTickEvent event)
     {
 //        Log.getLogger().info("Villages tick: " + getPosition() + " tick");
-        Log.getLogger().info("Villages tick");
+        //Log.getLogger().info("Villages tick");
         /* TODO update villagers number?
         if ((event.world.getWorldTime() % UPDATEVILLAGE ) == 0)
         {

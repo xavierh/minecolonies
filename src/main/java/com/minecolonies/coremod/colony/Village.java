@@ -209,12 +209,12 @@ public class Village
     public void onServerTick(@NotNull final TickEvent.ServerTickEvent event)
     {
         tickBeforeCollect--;
-        Log.getLogger().info("Village: tickBeforeCollect " + tickBeforeCollect);
+        //Log.getLogger().info("Village: tickBeforeCollect " + tickBeforeCollect);
         if (tickBeforeCollect < 0)
         {
             taxCollected += numVillagers;
             tickBeforeCollect=COLLECT_TAX;
-            Log.getLogger().info("Village ["+position+"] has collected " + taxCollected);
+            //Log.getLogger().info("Village ["+position+"] has collected " + taxCollected);
         }
 
     }

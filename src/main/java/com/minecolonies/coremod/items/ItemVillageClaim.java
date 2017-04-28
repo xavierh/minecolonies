@@ -51,6 +51,7 @@ public class ItemVillageClaim extends AbstractItemMinecolonies
             final float hitY,
             final float hitZ)
     {
+        Log.getLogger().info("onItemUse");
         if(worldIn == null || player == null)
         {
             return EnumActionResult.FAIL;
@@ -62,9 +63,13 @@ public class ItemVillageClaim extends AbstractItemMinecolonies
             return EnumActionResult.FAIL;
         }
 
+        Log.getLogger().info("onItemUse claim?");
         if (canClaimVillage(player, worldIn, pos))
         {
+            Log.getLogger().info("onItemUse claim ok");
             //todo ?
+            buildClaim(player, worldIn, pos);
+            Log.getLogger().info("onItemUse claim done");
             return EnumActionResult.SUCCESS;
         }
 
@@ -131,8 +136,15 @@ public class ItemVillageClaim extends AbstractItemMinecolonies
         currentPosition = pos.up();
         worldIn.setBlockState(currentPosition, Blocks.OAK_FENCE.getDefaultState());
         currentPosition = pos.up();
-        worldIn.setBlockState(currentPosition, Blocks.OAK_GLOWSTONE.getDefaultState());
-        currentPosition = pos.left();
+        worldIn.setBlockState(currentPosition, Blocks.GLOWSTONE.getDefaultState());
+        currentPosition = pos.north();
+        worldIn.setBlockState(currentPosition, Blocks.WALL_BANNER.getDefaultState());
+        currentPosition = pos.south(2);
+        worldIn.setBlockState(currentPosition, Blocks.WALL_BANNER.getDefaultState());
+        currentPosition = pos.north();
+        currentPosition = pos.east();
+        worldIn.setBlockState(currentPosition, Blocks.WALL_BANNER.getDefaultState());
+        currentPosition = pos.west(2);
         worldIn.setBlockState(currentPosition, Blocks.WALL_BANNER.getDefaultState());
 
 
