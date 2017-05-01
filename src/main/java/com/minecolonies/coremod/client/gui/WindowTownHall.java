@@ -16,6 +16,7 @@ import com.minecolonies.coremod.network.messages.*;
 import com.minecolonies.coremod.util.BlockPosUtil;
 import com.minecolonies.coremod.util.LanguageHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
@@ -70,6 +71,11 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
      * Id of the rename button in the GUI.
      */
     private static final String BUTTON_RENAME = "rename";
+
+    /**
+     * Id of the abandon button in the GUI.
+     */
+    private static final String BUTTON_ABANDON = "abandon";
 
     /**
      * Id of the add player button in the GUI.
@@ -385,6 +391,11 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
     private ScrollingList freeBlocksList;
 
     /**
+     * Confirmation dialog when deleting a scanned schematic.
+     */
+    private DialogDoneCancel confirmAbandonDialog;
+
+    /**
      * Constructor for the town hall window.
      *
      * @param townHall {@link BuildingTownHall.View}.
@@ -409,6 +420,7 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
         tabsToPages.keySet().forEach(key -> registerButton(key, this::onTabClicked));
         registerButton(BUTTON_ADD_PLAYER, this::addPlayerCLicked);
         registerButton(BUTTON_RENAME, this::renameClicked);
+        registerButton(BUTTON_ABANDON, this::abandonClicked);
         registerButton(BUTTON_REMOVE_PLAYER, this::removePlayerClicked);
         registerButton(BUTTON_PROMOTE, this::promoteDemoteClicked);
         registerButton(BUTTON_DEMOTE, this::promoteDemoteClicked);
@@ -1002,6 +1014,21 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
     }
 
     /**
+     * Action performed when abaondon button is clicked.
+     */
+    private void abandonClicked()
+    {
+        final EntityPlayerSP player = this.mc.player;
+        LanguageHandler.sendPlayerMessage(player, "Abandon your colony?");
+        confirmAbandonDialog = new DialogDoneCancel(getWindow());
+        confirmAbandonDialog.setHandler(this::onDialogClosed);
+        confirmAbandonDialog.setTitle(LanguageHandler.format("com.minecolonies.coremod.gui.townHall.abandon.title"));
+        confirmAbandonDialog.setTextContent(LanguageHandler.format("com.minecolonies.coremod.gui.townHall.abandon.body"));
+        confirmAbandonDialog.open();
+    }
+
+
+    /**
      * Action performed when add player button is clicked.
      */
     private void addPlayerCLicked()
@@ -1060,5 +1087,24 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
     private void recallClicked()
     {
         MineColonies.getNetwork().sendToServer(new RecallTownhallMessage(townHall));
+    }
+
+    /**
+     * handle when a dialog is closed.
+     *
+     * @param dialog which is being closed.
+     * @param buttonId is the id of the button used to close the dialog.
+     */
+    public void onDialogClosed(final DialogDoneCancel dialog, final int buttonId)
+    {
+        final EntityPlayerSP player = this.mc.player;
+        LanguageHandler.sendPlayerMessage(player, "Abandon your colony: buttonId="+buttonId);
+        if (dialog == confirmAbandonDialog && buttonId == DialogDoneCancel.DONE)
+        {
+            LanguageHandler.sendPlayerMessage(player, "Abandon your colony!");
+            close();
+            MineColonies.getNetwork()
+              .sendToServer(new ColonyDeleteMessage(townHall.getColony()));
+        }
     }
 }

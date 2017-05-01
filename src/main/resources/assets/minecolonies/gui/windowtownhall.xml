@@ -81,6 +81,9 @@
             <button id="rename" size="116 20" pos="0 153"
                     label="$(com.minecolonies.coremod.gui.townHall.rename)"
                     align="TOP_MIDDLE"/>
+            <button id="abandon" size="116 20" pos="0 176"
+                    label="$(com.minecolonies.coremod.gui.townHall.abandon)"
+                    align="TOP_MIDDLE"/>
         </view>
         <view id="pageInfo">
             <group align="TOP_MIDDLE" size="80% 100%" pos="0 11">
