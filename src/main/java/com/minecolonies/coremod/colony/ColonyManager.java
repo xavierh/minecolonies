@@ -171,6 +171,7 @@ public final class ColonyManager
             coloniesByWorld.get(colony.getDimension()).remove(colony);
             final Set<World> colonyWorlds = new HashSet<>();
             Log.getLogger().info("Removing citizens for " + id);
+            Log.getLogger().info("Removing citizens size " + colony.getCitizens().values().size());
             for (final CitizenData citizenData : new ArrayList<>(colony.getCitizens().values()))
             {
                 Log.getLogger().info("Kill Citizen " + citizenData.getName());
@@ -183,6 +184,7 @@ public final class ColonyManager
                 }
             }
             Log.getLogger().info("Removing buildings for " + id);
+            Log.getLogger().info("Removing buildings size " + colony.getBuildings().values().size());
             for (final AbstractBuilding building : new ArrayList<>(colony.getBuildings().values()))
             {
 
@@ -195,6 +197,10 @@ public final class ColonyManager
                     {
                         Log.getLogger().info("Found Block, deleting " + world.getBlockState(location).getBlock());
                         world.setBlockToAir(location);
+                    }
+                    else
+                    {
+                        Log.getLogger().info("Found Block instead " + world.getBlockState(location).getBlock());
                     }
                 }
             }

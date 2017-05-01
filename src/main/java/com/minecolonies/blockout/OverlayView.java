@@ -44,6 +44,16 @@ public class OverlayView extends View
         }
     }
 
+    public void setVisible(boolean visible)
+    {
+        if (visible==true)
+        {
+            setPosition(0,0);
+        }
+        super.setVisible(visible);
+        
+    }
+
     /**
      * Called when a key is pressed.
      * hide the view when ESC is pressed.
@@ -55,7 +65,6 @@ public class OverlayView extends View
     @Override
     public boolean onKeyTyped(final char ch, final int key)
     {
-        Log.getLogger().info("OverlayView::onKeyTyped()");
         if (isVisible() && key == Keyboard.KEY_ESCAPE)
         {
             setVisible(false);

@@ -376,3 +376,8 @@ item.supplyCampDeployer.invalid=Requiring a flat ground of at least 16*17.
 item.minecolonies.supplyChestDeployer.name=SupplyShip Chest
 item.minecolonies.supplyCampDeployer.name=SupplyCamp Chest
 com.minecolonies.coremod.error.supplyChestAlreadyPlaced=You have already placed a supply ship or supply camp!
+com.minecolonies.coremod.gui.townHall.abandon=Abandon your colony
+com.minecolonies.coremod.gui.townHall.abandon.title=Abandon your colony ?
+com.minecolonies.coremod.gui.townHall.abandon.body=Are you sure you like to abandon your colony?
+com.minecolonies.coremod.gui.townHall.abandon.warning=Make sure to pick up you town hall!
+

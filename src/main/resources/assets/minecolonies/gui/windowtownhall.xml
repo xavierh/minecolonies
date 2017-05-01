@@ -1,7 +1,8 @@
-<window xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" size="171 247" pause="false"
+<window xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" size="420 240" pause="false"
         lightbox="false"
         xsi:noNamespaceSchemaLocation="file:../../../../java/com/minecolonies/blockout/blockOut.xsd">
-    <group size="100 185" pos="-90 10" spacing="1">
+<!--size="171 247"-->
+    <group size="100 185" pos="0 10" spacing="1">
         <buttonimage id="info" size="100% 30"
                      source="minecolonies:textures/gui/guiBanners.png"
                      imageoffset="0 0" imagesize="120 30"
@@ -45,9 +46,9 @@
                      textcolor="DimGray" texthovercolor="DimGray" textdisabledcolor="DarkGray"/>
     </group>
 
-    <image source="minecolonies:textures/gui/guiHutBackground.png" size="100% 100%" y="-5"/>
+    <image source="minecolonies:textures/gui/guiHutBackground.png" size="171 212" x="171" y="-5"/>
 
-    <switch id="pages" size="100% 212px" pos="0 0" default="pageActions">
+    <switch id="pages" size="171 212px" pos="0 0" default="pageActions">
         <view id="pageActions">
 
             <group size="100% 22" pos="0 4">

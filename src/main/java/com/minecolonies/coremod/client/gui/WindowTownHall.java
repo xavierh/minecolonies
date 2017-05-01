@@ -20,6 +20,8 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
+import com.minecolonies.coremod.util.Log;
+
 import java.util.*;
 
 /**
@@ -1018,6 +1020,7 @@ public class WindowTownHall extends AbstractWindowBuilding<BuildingTownHall.View
      */
     private void abandonClicked()
     {
+        Log.getLogger().info("window="+getWindow());
         final EntityPlayerSP player = this.mc.player;
         LanguageHandler.sendPlayerMessage(player, "Abandon your colony?");
         confirmAbandonDialog = new DialogDoneCancel(getWindow());

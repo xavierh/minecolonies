@@ -143,6 +143,9 @@ public class DialogDoneCancel extends OverlayView implements Button.Handler
         {
             setPosition(0, 0);
             setSize(window.getInteriorWidth(), window.getInteriorHeight());
+            Log.getLogger().info("window="+window);
+            Log.getLogger().info("set position to 0");
+            Log.getLogger().info("set size "+window.getInteriorWidth() + ", " +window.getInteriorHeight());
             //Make sure we are on top
             putInside(window);
         }
