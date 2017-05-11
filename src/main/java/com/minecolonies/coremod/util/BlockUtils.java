@@ -77,7 +77,8 @@ public final class BlockUtils
     /**
      * Get the filler block at a certain location.
      * If block follows gravity laws return dirt.
-     * @param world the world the block is in.
+     *
+     * @param world    the world the block is in.
      * @param location the location it is at.
      * @return the IBlockState of the filler block.
      */
@@ -249,6 +250,10 @@ public final class BlockUtils
         {
             return Item.getItemFromBlock(Blocks.DIRT);
         }
+        else if(blockState.getBlock() instanceof BlockFire)
+        {
+            return Items.FLINT_AND_STEEL;
+        }
         else if (blockState.getBlock() instanceof BlockFlowerPot)
         {
             return Items.FLOWER_POT;
@@ -367,8 +372,38 @@ public final class BlockUtils
     }
 
     /**
-     * Get the damage value from a block and blockState, where the block is the placeable and obtainable block.
-     * The blockstate might differ from the block.
+     * Compares two blocks and checks if they are equally dirt.
+     * Meaning dirt and grass are equal. But podzol and coarse dirt not.
+     *
+     * @param structureBlock the block of the structure.
+     * @param worldBlock the world block.
+     * @param structureMetaData the structure metadata.
+     * @param worldMetadata the world metadata.
+     * @return true if equal.
+     */
+    public static boolean isGrassOrDirt(@NotNull final Block structureBlock, @NotNull final Block worldBlock,
+            @NotNull final IBlockState structureMetaData, @NotNull final IBlockState worldMetadata)
+    {
+        if((structureBlock == Blocks.DIRT || structureBlock == Blocks.GRASS) && (worldBlock == Blocks.DIRT || worldBlock == Blocks.GRASS))
+        {
+            if(structureBlock == Blocks.DIRT
+                    && (structureMetaData.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.COARSE_DIRT
+                    || structureMetaData.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL))
+            {
+                return false;
+            }
+
+            return worldBlock != Blocks.DIRT
+                    || (worldMetadata.getValue(BlockDirt.VARIANT) != BlockDirt.DirtType.COARSE_DIRT
+                    && worldMetadata.getValue(BlockDirt.VARIANT) != BlockDirt.DirtType.PODZOL);
+        }
+        return  false;
+    }
+
+    /**
+     * Get the damage value from a block and blockState, where the block is the
+     * placeable and obtainable block. The blockstate might differ from the
+     * block.
      *
      * @param block      the block.
      * @param blockState the state.

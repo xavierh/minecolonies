@@ -2,10 +2,10 @@ package com.minecolonies.coremod.colony.workorders;
 
 import com.minecolonies.coremod.colony.CitizenData;
 import com.minecolonies.coremod.colony.Colony;
+import com.minecolonies.coremod.colony.Structures;
 import com.minecolonies.coremod.colony.buildings.AbstractBuilding;
 import com.minecolonies.coremod.colony.buildings.BuildingBuilder;
 import com.minecolonies.coremod.colony.jobs.JobBuilder;
-import com.minecolonies.coremod.colony.Structures;
 import com.minecolonies.coremod.util.BlockPosUtil;
 import com.minecolonies.coremod.util.LanguageHandler;
 import com.minecolonies.coremod.util.Log;
@@ -78,10 +78,10 @@ public class WorkOrderBuild extends AbstractWorkOrder
             Log.getLogger().info("WorkOrderBuild at location " + this.buildingLocation + " is using " +  sn + " instead of " + previousStructureName);
         }
 
+
         this.structureName = sn.toString();
         this.workOrderName = this.structureName;
         this.md5 = Structures.getMD5(this.structureName);
-
     }
 
     /**

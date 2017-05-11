@@ -98,7 +98,8 @@ public final class EntityFishHook extends Entity
     private static final double NO_CLEAR_SKY_CHANCE = 0.5;
 
     /**
-     * Chance to get rare drops while fishing. Higher value leads to a lower chance.
+     * Chance to get rare drops while fishing. Higher value leads to a lower
+     * chance.
      */
     private static final int INCREASE_RARENESS_MODIFIER = 200;
 
@@ -106,31 +107,31 @@ public final class EntityFishHook extends Entity
      * entity creation time.
      * Used to check it the hook got stuck.
      */
-    private final long creationTime;
+    private final long          creationTime;
     /**
      * The citizen who threw this rod.
      */
-    private EntityCitizen citizen;
+    private       EntityCitizen citizen;
     /**
      * The fishing speed enchantment level on the rod that threw this hook.
      */
-    private int fishingSpeedEnchantment;
+    private       int           fishingSpeedEnchantment;
     /**
      * The fishing loot enchantment level on the rod that threw this hook.
      */
-    private int fishingLootEnchantment;
+    private       int           fishingLootEnchantment;
     /**
      * If this hook is in the ground.
      */
-    private boolean inGround;
+    private       boolean       inGround;
     /**
      * A counter for at what position in the shaking movement the hook is.
      */
-    private int    shake;
-    private int    countdownNoFish;
-    private int    countdownFishNear;
-    private int    countdownFishBites;
-    private double relativeRotation;
+    private       int           shake;
+    private       int           countdownNoFish;
+    private       int           countdownFishNear;
+    private       int           countdownFishBites;
+    private       double        relativeRotation;
     /**
      * When a fish is on the hook, this will be true.
      */
@@ -245,12 +246,18 @@ public final class EntityFishHook extends Entity
             this.setDead();
         }
         bounceFromGround();
+        if (this.inGround)
+        {
+            return;
+        }
+
         moveSomeStuff();
     }
 
     /**
-     * Checks if the entity is in range to render by using the past in distance and comparing it to its average edge.
-     * length * 64 * renderDistanceWeight Args: distance.
+     * Checks if the entity is in range to render by using the past in distance
+     * and comparing it to its average edge. length * 64 * renderDistanceWeight
+     * Args: distance.
      *
      * @param range the real range.
      * @return true or false.
@@ -315,10 +322,8 @@ public final class EntityFishHook extends Entity
      * Update some movement things for the hook.
      * Detect if the hook is on ground and maybe bounce.
      * Also count how long the hook is laying on the ground or in water.
-     *
-     * @return true if the hook is killed.
      */
-    private boolean bounceFromGround()
+    private void bounceFromGround()
     {
         if (this.shake > 0)
         {
@@ -327,15 +332,13 @@ public final class EntityFishHook extends Entity
 
         if (!this.inGround)
         {
-            return false;
+            return;
         }
 
         this.inGround = false;
         this.motionX *= (this.rand.nextDouble() * BOUNCE_MOVEMENT_LIMITER);
         this.motionY *= (this.rand.nextDouble() * BOUNCE_MOVEMENT_LIMITER);
         this.motionZ *= (this.rand.nextDouble() * BOUNCE_MOVEMENT_LIMITER);
-
-        return false;
     }
 
     /**
@@ -658,7 +661,6 @@ public final class EntityFishHook extends Entity
      * Spawns a random loot from the loot table.
      * and some exp orbs.
      * Should be called when retrieving a hook.
-     * todo: Perhaps streamline this and directly add the items?
      *
      * @param citizen the fisherman getting the loot.
      */
@@ -698,7 +700,7 @@ public final class EntityFishHook extends Entity
         final int random = this.world.rand.nextInt(INCREASE_RARENESS_MODIFIER);
         final int buildingLevel = citizen.getWorkBuilding().getBuildingLevel();
         //Cut to minimum value of 0.
-        final int lootBonus = MathHelper.clamp(fishingLootEnchantment- fishingSpeedEnchantment,0,Integer.MAX_VALUE);
+        final int lootBonus = MathHelper.clamp(fishingLootEnchantment - fishingSpeedEnchantment, 0, Integer.MAX_VALUE);
 
         if (random >= buildingLevel * (lootBonus + 1) || buildingLevel == 1)
         {
@@ -717,19 +719,16 @@ public final class EntityFishHook extends Entity
 
     /**
      * Return some random loot of a defined lootTable.
+     *
      * @param lootTable the lootTable.
      * @return the ItemStack of the loot.
      */
     private ItemStack getLootForLootTable(ResourceLocation lootTable)
     {
         final LootContext.Builder lootContextBuilder = new LootContext.Builder((WorldServer) this.world);
-        for (final ItemStack itemstack : this.world.getLootTableManager()
+        return this.world.getLootTableManager()
                 .getLootTableFromLocation(lootTable)
-                .generateLootForPools(this.rand, lootContextBuilder.build()))
-        {
-            return itemstack;
-        }
-        return null;
+                .generateLootForPools(this.rand, lootContextBuilder.build()).stream().findFirst().orElse(null);
     }
 
     /**
